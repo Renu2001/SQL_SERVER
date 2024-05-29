@@ -1,0 +1,672 @@
+create database Practise
+
+use practise
+
+--DDL
+
+--1) Create
+-- Primary Key/Constraint
+
+CREATE TABLE Authors (
+    AuthorID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50)
+);
+
+--Foreign Key/Constraint
+
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(100),
+    Genre NVARCHAR(50),
+    AuthorID INT,
+    CONSTRAINT FK_Author FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID)
+);
+
+--Unique Constraint
+
+CREATE TABLE Members (
+    MemberID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    MembershipDate DATE,
+    CONSTRAINT UC_Members UNIQUE (FirstName, LastName)
+);
+
+--Identity Constraint
+
+CREATE TABLE Loans (
+    LoanID INT PRIMARY KEY IDENTITY(1,1),
+    BookID INT,
+    MemberID INT,
+    LoanDate DATE,
+    ReturnDate DATE,
+);
+
+--2) Alter 
+
+ALTER TABLE Books
+ADD PublicationYear INT;
+
+--3) Drop
+
+DROP TABLE Loans;
+
+--DML
+
+--1) Insert
+
+INSERT INTO Authors (FirstName, LastName) VALUES ('George', 'Orwell');
+INSERT INTO Authors (FirstName, LastName) VALUES ('J.K.', 'Rowling');
+INSERT INTO Authors (FirstName, LastName) VALUES ('J.R.R.', 'Tolkien');
+
+
+INSERT INTO Books (Title, Genre, AuthorID) VALUES ('1984', 'Dystopian', 1);
+INSERT INTO Books (Title, Genre, AuthorID) VALUES ('Harry Potter and the Philosopher''s Stone', 'Fantasy', 2);
+INSERT INTO Books (Title, Genre, AuthorID) VALUES ('The Hobbit', 'Fantasy', 3);
+
+--2) Update
+
+UPDATE Books
+SET Genre = 'Classic'
+WHERE Title = '1984';
+
+--3) Delete
+
+DELETE FROM Books
+WHERE BookID = 1;
+
+--4) Select
+
+SELECT * FROM Books;
+
+SELECT Title, Genre FROM Books WHERE AuthorID = 2;
+
+--DCL
+
+-- Create a login for the SQL Server instance
+CREATE LOGIN LibraryUser WITH PASSWORD = 'StrongPassword123!';
+
+-- Create a user for the database using the login
+CREATE USER LibraryUser FOR LOGIN LibraryUser;
+
+-- Grant permissions on the Books table
+GRANT SELECT, INSERT, UPDATE, DELETE ON Books TO LibraryUser;
+
+-- Grant only SELECT permission on the Authors table
+GRANT SELECT ON Authors TO LibraryUser;
+
+-- Revoke DELETE permission on the Books table
+REVOKE DELETE ON Books FROM LibraryUser;
+
+--Keys
+Primary Key = Primary key uniquely defines the column and does not have null values
+Unique Key = Unique key uniquely identifies a column and has one null value
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Email NVARCHAR(100) UNIQUE,
+    DateOfBirth DATE
+);
+
+Candidate Key = A column or set of columns that can uniquely identify a record.
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY, -- Candidate Key
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Email NVARCHAR(100) UNIQUE, -- Candidate Key
+    DateOfBirth DATE
+);
+
+Alternate Key = A candidate key not chosen as the primary key.
+Example: If Email in Students table could uniquely identify students but is not the primary key, it's an alternate key.
+
+Composite Key = A primary key made up of two or more columns.
+CREATE TABLE Enrollments (
+    StudentID INT,
+    CourseID INT,
+    EnrollmentDate DATE,
+    PRIMARY KEY (StudentID, CourseID)
+);
+
+Foreign Key = Establishes a relationship between two tables.
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY,
+    CourseName NVARCHAR(100),
+    DepartmentID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+Natural Key = A key based on real-world data that uniquely identifies a record.
+Example: Email in the Students table, if it naturally uniquely identifies students.
+
+Surrogate Key = A system-generated unique identifier, not derived from application data.
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Email NVARCHAR(100),
+    DateOfBirth DATE
+);
+Example: StudentID in the Students table.
+
+Super Key = A set of one or more columns that, when taken together, can uniquely identify a record.
+Example: {StudentID}, {Email}, and {StudentID, Email} in the Students table are super keys.
+
+Minimal Super Key = A super key with no redundant attributes, also known as a candidate key.
+Example: {StudentID} and {Email} in the Students table are minimal super keys.
+
+--Joins
+
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Email NVARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY,
+    CourseName NVARCHAR(100),
+    DepartmentID INT
+);
+
+CREATE TABLE Enrollments (
+    EnrollmentID INT PRIMARY KEY,
+    StudentID INT,
+    CourseID INT,
+    EnrollmentDate DATE,
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID),
+    UNIQUE(StudentID, CourseID)
+);
+
+INSERT INTO Students (StudentID, FirstName, LastName, Email) VALUES
+(1, 'John', 'Doe', 'john.doe@example.com'),
+(2, 'Jane', 'Smith', 'jane.smith@example.com'),
+(3, 'Bob', 'Johnson', 'bob.johnson@example.com'),
+(4, 'Alice', 'Johnson', 'alice.johnson@example.com'),
+(5, 'Michael', 'Williams', 'michael.williams@example.com');
+
+INSERT INTO Courses (CourseID, CourseName, DepartmentID) VALUES
+(101, 'Database Systems', 1),
+(102, 'Algorithms', 1),
+(103, 'Operating Systems', 2);
+
+INSERT INTO Enrollments (EnrollmentID, StudentID, CourseID, EnrollmentDate) VALUES
+(1, 1, 101, '2023-01-15'),
+(2, 2, 102, '2023-01-16'),
+(3, 1, 103, '2023-01-17'),
+(4, 3, 103, '2023-01-18');
+
+INSERT INTO Enrollments (EnrollmentID, StudentID, CourseID, EnrollmentDate) VALUES
+(5, 2, 101, '2023-01-18'),
+(6, 3, 102, '2023-01-19'),
+(7, 4, 103, '2023-01-20');
+
+
+INSERT INTO Enrollments (EnrollmentID, StudentID, CourseID, EnrollmentDate) VALUES
+(8, 5, 101, '2023-01-18');
+
+INSERT INTO Courses (CourseID, CourseName, DepartmentID) VALUES
+(104, 'Computer Networks', 2),
+(105, 'Web Development', 3),
+(106, 'Data Structures', 1);
+
+--Inner Join
+
+SELECT s.StudentID, s.FirstName, s.LastName, e.CourseID, e.EnrollmentDate
+FROM Students s
+INNER JOIN Enrollments e ON s.StudentID = e.StudentID;
+
+SELECT s.StudentID, s.FirstName, s.LastName, c.CourseName, e.EnrollmentDate
+FROM Students s
+INNER JOIN Enrollments e ON s.StudentID = e.StudentID
+INNER JOIN Courses c ON e.CourseID = c.CourseID;
+
+
+--Left Join (Left Outer Join)
+
+SELECT s.StudentID, s.FirstName, s.LastName, e.CourseID, e.EnrollmentDate
+FROM Students s
+LEFT JOIN Enrollments e ON s.StudentID = e.StudentID;
+
+
+SELECT s.StudentID, s.FirstName, s.LastName, c.CourseName, e.EnrollmentDate
+FROM Students s
+LEFT JOIN Enrollments e ON s.StudentID = e.StudentID
+LEFT JOIN Courses c ON e.CourseID = c.CourseID;
+
+
+
+--Right Join
+
+SELECT s.StudentID, s.FirstName, s.LastName, e.CourseID, e.EnrollmentDate
+FROM Students s
+RIGHT JOIN Enrollments e ON s.StudentID = e.StudentID;
+
+SELECT s.StudentID, s.FirstName, s.LastName, c.CourseName, e.EnrollmentDate
+FROM Students s
+RIGHT JOIN Enrollments e ON s.StudentID = e.StudentID
+RIGHT JOIN Courses c ON e.CourseID = c.CourseID;
+
+
+--Full Join
+
+SELECT s.StudentID, s.FirstName, s.LastName, e.CourseID, e.EnrollmentDate
+FROM Students s
+FULL JOIN Enrollments e ON s.StudentID = e.StudentID;
+
+SELECT s.StudentID, s.FirstName, s.LastName, c.CourseName, e.EnrollmentDate
+FROM Students s
+FULL JOIN Enrollments e ON s.StudentID = e.StudentID
+FULL JOIN Courses c ON e.CourseID = c.CourseID;
+
+--Cross Join
+
+SELECT s.StudentID, s.FirstName, s.LastName, e.CourseID, e.EnrollmentDate
+FROM Students s
+CROSS JOIN Enrollments e;
+
+SELECT s.StudentID, s.FirstName, s.LastName, c.CourseName,e.EnrollmentID
+FROM Students s
+CROSS JOIN Courses c
+cross join Enrollments e;
+
+
+--Subqueries
+
+SELECT FirstName, LastName
+FROM Students
+WHERE StudentID IN (
+    SELECT StudentID
+    FROM Enrollments
+    WHERE CourseID = (
+        SELECT CourseID
+        FROM Courses
+        WHERE CourseName = 'Database Systems'
+    )
+);
+
+SELECT FirstName, LastName
+FROM Students
+WHERE StudentID IN (
+    SELECT StudentID
+    FROM Enrollments
+    GROUP BY StudentID
+    HAVING COUNT(*) = 1
+);
+
+--Constraint
+
+--1)Primary key
+
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50)
+);
+
+--1)Foreign key
+
+CREATE TABLE Enrollments (
+    EnrollmentID INT PRIMARY KEY,
+    StudentID INT,
+    CourseID INT,
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
+);
+
+--1)Default
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Department NVARCHAR(50) DEFAULT 'IT'
+);
+--1)Unique
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Email NVARCHAR(100) UNIQUE
+);
+
+--1)NotNull
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName NVARCHAR(50) NOT NULL,
+    LastName NVARCHAR(50) NOT NULL
+);
+
+--1)Check
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Age INT CHECK (Age >= 18)
+);
+
+--Stored Procedures
+
+CREATE PROCEDURE GetStudentInfo
+    @StudentID INT
+AS
+BEGIN
+    SELECT *
+    FROM Students
+    WHERE StudentID = @StudentID;
+END;
+
+Exec GetStudentInfo 1
+
+CREATE or alter PROC AddNewStudent
+	@StudentId INT,
+    @FirstName NVARCHAR(50),
+    @LastName NVARCHAR(50),
+    @Email NVARCHAR(100)
+AS
+BEGIN
+    INSERT INTO Students (StudentId,FirstName, LastName, Email)
+    VALUES (@StudentId ,@FirstName, @LastName, @Email);
+END;
+
+EXEC AddNewStudent 
+	@StudentId =11,
+    @FirstName = 'Alice',
+    @LastName = 'Smith',
+    @Email = 'alice.smith@example.com';
+
+
+CREATE PROCEDURE UpdateStudentInfo
+    @StudentID INT,
+    @FirstName NVARCHAR(50),
+    @LastName NVARCHAR(50),
+    @Email NVARCHAR(100)
+AS
+BEGIN
+    UPDATE Students
+    SET FirstName = @FirstName,
+        LastName = @LastName,
+        Email = @Email
+    WHERE StudentID = @StudentID;
+END;
+
+EXEC UpdateStudentInfo 
+	@StudentId =5,
+    @FirstName = 'Alice',
+    @LastName = 'Smith',
+    @Email = 'alice1.smith@example.com';
+
+CREATE PROCEDURE GetStudentEnrollments
+    @StudentID INT
+AS
+BEGIN
+    SELECT Courses.CourseName, Enrollments.EnrollmentDate
+    FROM Enrollments
+    INNER JOIN Courses ON Enrollments.CourseID = Courses.CourseID
+    WHERE Enrollments.StudentID = @StudentID;
+END;
+
+Exec GetStudentEnrollments 2
+
+CREATE PROCEDURE CountStudentEnrollment
+    @StudentID INT,
+    @EnrollmentCount INT OUTPUT
+AS
+BEGIN
+    -- Count the number of enrollments for the given student
+    SELECT @EnrollmentCount = COUNT(*)
+    FROM Enrollments
+    WHERE StudentID = @StudentID;
+END;
+
+DECLARE @Count INT;
+
+-- Execute the stored procedure
+EXEC CountStudentEnrollment
+    @StudentID = 1,
+    @EnrollmentCount = @Count OUTPUT;
+
+-- Print the enrollment count
+PRINT 'The number of enrollments for student 1 is: ' + CAST(@Count AS NVARCHAR(10));
+
+--Functions
+--Scalar function
+
+CREATE FUNCTION CalculateAge
+(
+    @DateOfBirth DATE
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Age INT;
+    SELECT @Age = DATEDIFF(YEAR, @DateOfBirth, GETDATE()) - 
+                  CASE WHEN MONTH(@DateOfBirth) > MONTH(GETDATE()) 
+                        OR (MONTH(@DateOfBirth) = MONTH(GETDATE()) AND DAY(@DateOfBirth) > DAY(GETDATE()))
+                       THEN 1 ELSE 0 END;
+    RETURN @Age;
+END;
+
+SELECT dbo.CalculateAge('2000-05-15') AS Age;
+
+
+--Inline table valued function
+
+CREATE FUNCTION GetEnrollmentsByStudent
+(
+    @StudentID INT
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT EnrollmentID, CourseID, EnrollmentDate
+    FROM Enrollments
+    WHERE StudentID = @StudentID
+);
+
+SELECT * FROM dbo.GetEnrollmentsByStudent(1);
+
+--Multiline table valued function
+
+CREATE FUNCTION GetTotalEnrollments()
+RETURNS @EnrollmentsTable TABLE
+(
+    StudentID INT,
+    TotalEnrollments INT
+)
+AS
+BEGIN
+    INSERT INTO @EnrollmentsTable
+    SELECT StudentID, COUNT(*) AS TotalEnrollments
+    FROM Enrollments
+    GROUP BY StudentID;
+
+    RETURN;
+END;
+
+SELECT * FROM dbo.GetTotalEnrollments();
+
+--A table variable is a special type of variable in SQL Server that holds rows of data, similar to a temporary table. However, table variables are scoped to the batch, stored procedure, or function in which they are declared and are typically used to store intermediate results. 
+
+--view
+
+CREATE VIEW StudentEnrollments AS
+SELECT
+    s.StudentID,
+    s.FirstName,
+    s.LastName,
+    e.CourseID,
+    e.EnrollmentDate
+FROM
+    Students s
+INNER JOIN
+    Enrollments e ON s.StudentID = e.StudentID;
+
+select * from StudentEnrollments
+
+
+CREATE VIEW StudentsInCourse101 AS
+SELECT
+    s.StudentID,
+    s.FirstName,
+    s.LastName,
+    e.CourseID,
+    e.EnrollmentDate
+FROM
+    Students s
+INNER JOIN
+    Enrollments e ON s.StudentID = e.StudentID
+WHERE
+    e.CourseID = 101;
+
+
+UPDATE StudentEnrollments
+SET FirstName = 'UpdatedName'
+WHERE StudentID = 1;
+
+
+-- Cursor
+--A cursor in SQL Server is a database object used to retrieve, manipulate, and traverse through a result set row by row.
+
+CREATE TABLE Studentss (
+    StudentID INT PRIMARY KEY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Email NVARCHAR(100)
+);
+
+INSERT INTO Studentss (StudentID, FirstName, LastName, Email) VALUES
+(1, 'John', 'Doe', 'john.doe@example.com'),
+(2, 'Jane', 'Smith', 'jane.smith@example.com'),
+(3, 'Alice', 'Johnson', 'alice.johnson@example.com');
+
+DECLARE @StudentID INT;
+DECLARE @FirstName NVARCHAR(50);
+DECLARE @LastName NVARCHAR(50);
+
+-- Declare the cursor
+DECLARE student_cursor CURSOR FOR
+SELECT StudentID, FirstName, LastName
+FROM Students;
+
+-- Open the cursor
+OPEN student_cursor;
+
+-- Fetch the first row into the variables
+FETCH NEXT FROM student_cursor INTO @StudentID, @FirstName, @LastName;
+
+-- Loop through the result set
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Print the student's full name
+    PRINT 'StudentID: ' + CAST(@StudentID AS NVARCHAR(10)) + ', Name: ' + @FirstName + ' ' + @LastName;
+
+    -- Fetch the next row into the variables
+    FETCH NEXT FROM student_cursor INTO @StudentID, @FirstName, @LastName;
+END;
+
+-- Close the cursor
+CLOSE student_cursor;
+
+-- Deallocate the cursor
+DEALLOCATE student_cursor;
+
+
+--Triggeres
+--After Trigger
+
+-- Create the log table
+CREATE TABLE StudentLog (
+    LogID INT IDENTITY(1,1) PRIMARY KEY,
+    StudentID INT,
+    Action NVARCHAR(50),
+    LogDate DATETIME
+);
+
+-- Create the AFTER INSERT trigger
+CREATE TRIGGER trgAfterInsertStudents
+ON Studentss
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO StudentLog (StudentID, Action, LogDate)
+    SELECT StudentID, 'INSERT', GETDATE()
+    FROM inserted;
+END;
+
+INSERT INTO Studentss (StudentID, FirstName, LastName, Email)
+VALUES (4, 'Bob', 'Brown', 'bob.brown@example.com');
+
+-- Check the log table
+SELECT * FROM StudentLog;
+
+--Instead of Trigger
+
+-- Create the INSTEAD OF UPDATE trigger
+CREATE TRIGGER trgInsteadOfUpdateStudentID
+ON Studentss
+INSTEAD OF UPDATE
+AS
+BEGIN
+    IF EXISTS (SELECT * FROM inserted WHERE StudentID <> (SELECT StudentID FROM deleted))
+    BEGIN
+        RAISERROR('You cannot update the StudentID column.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+    ELSE
+    BEGIN
+        UPDATE Students
+        SET FirstName = inserted.FirstName,
+            LastName = inserted.LastName,
+            Email = inserted.Email
+        FROM inserted
+        WHERE Students.StudentID = inserted.StudentID;
+    END
+END;
+
+UPDATE Studentss
+SET  FirstName = 'UpdatedName'
+WHERE StudentID = 4;
+
+--DDL Trigger
+
+CREATE TABLE DDLLog (
+    LogID INT IDENTITY(1,1) PRIMARY KEY,
+    EventType NVARCHAR(50),
+    ObjectName NVARCHAR(255),
+    EventDate DATETIME
+);
+
+-- Create the DDL trigger
+CREATE TRIGGER trgDDLCapture
+ON DATABASE
+FOR CREATE_TABLE
+AS
+BEGIN
+    DECLARE @EventData XML;
+    SET @EventData = EVENTDATA();
+
+    INSERT INTO DDLLog (EventType, ObjectName, EventDate)
+    VALUES (
+        @EventData.value('(/EVENT_INSTANCE/EventType)[1]', 'NVARCHAR(50)'),
+        @EventData.value('(/EVENT_INSTANCE/ObjectName)[1]', 'NVARCHAR(255)'),
+        GETDATE()
+    );
+END;
+
+CREATE TABLE TestTable (
+    TestID INT PRIMARY KEY,
+    TestName NVARCHAR(50)
+);
+
+-- Check the DDL log table
+SELECT * FROM DDLLog;
+
+
